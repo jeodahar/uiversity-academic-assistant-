@@ -414,15 +414,34 @@ with st.sidebar:
 
     st.markdown("### Knowledge Base")
 
-    total_documents = database_metadata.get(
-        "documents",
-        database_metadata.get("total_documents", "—"),
-    )
+    # Streamlit st.metric() accepts a scalar value (string/number),
+    # but some preprocessing versions store "documents" as a list/dict.
+    # Derive a safe document count from the chunk metadata instead.
+    document_names = set()
+    for item in chunks:
+        item_metadata = item.get("metadata", {}) if isinstance(item, dict) else {}
+        if isinstance(item_metadata, dict):
+            name = (
+                item_metadata.get("source_filename")
+                or item_metadata.get("filename")
+                or item_metadata.get("source_file")
+            )
+            if name:
+                document_names.add(str(name))
 
-    total_chunks = database_metadata.get(
-        "chunks",
-        database_metadata.get("total_chunks", len(chunks)),
-    )
+    total_documents = len(document_names)
+    if total_documents == 0:
+        stored_documents = database_metadata.get(
+            "total_documents", database_metadata.get("documents")
+        )
+        if isinstance(stored_documents, (int, float, str)):
+            total_documents = stored_documents
+        else:
+            total_documents = "—"
+
+    # The FAISS index must contain one vector per chunk.
+    # len(chunks) is therefore the most reliable displayed chunk count.
+    total_chunks = len(chunks)
 
     col1, col2 = st.columns(2)
 
