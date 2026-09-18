@@ -1,0 +1,10 @@
+{
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "embedding_dimension": 384,
+  "similarity": "cosine",
+  "faiss_index_type": "IndexFlatIP",
+  "normalized_embeddings": true,
+  "chunk_size": 700,
+  "chunk_overlap": 120,
+  "total_vectors": 1056
+}
